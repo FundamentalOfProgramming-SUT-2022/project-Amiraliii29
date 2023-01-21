@@ -14,6 +14,9 @@ void cat();
 
 int main(){
 
+    printf("Welcome to sheikh vim :)\n");
+    printf("please type \"exit\" to stop program\n");
+
     char input;
 
     while(1){
@@ -52,15 +55,13 @@ void createfile(){
     char in;
     char fileName[100] = {'\0'};
     in = getchar();
-    if(in == '"'){
-        
+    if(in == '\"'){
+        getchar();
         for (int i = 0; ; i++)
         {
             in = getchar();
-            if(in == '"')
+            if(in == '\"')
                 break;
-            else if(in == ' ')
-                fileName[i] = 'A';
             else{
                 fileName[i] = in;
             }                
@@ -70,7 +71,7 @@ void createfile(){
         in = getchar();
         for (int i = 0; ; i++)
         {
-            if(in == ' ' || in == '\n')
+            if(in == '\n')
                 break;
             else 
                 fileName[i] = in;
@@ -119,15 +120,13 @@ void insert(){
     char in;
     char fileName[100] = {'\0'};
     in = getchar();
-    if(in == '"'){
-        
+    if(in == '\"'){
+        getchar();
         for (int i = 0; ; i++)
         {
             in = getchar();
-            if(in == '"')
+            if(in == '\"')
                 break;
-            else if(in == ' ')
-                fileName[i] = 'A';
             else{
                 fileName[i] = in;
             }                
@@ -137,15 +136,15 @@ void insert(){
         in = getchar();
         for (int i = 0; ; i++)
         {
-            if(in == ' ' || in == '-')
+            if(in == '-' || in == ' ')
                 break;
             else 
                 fileName[i] = in;
             in = getchar();
         }
     }
-    //printf("---%s---\n" , fileName);
-    char text[200000];
+    printf("---%s---\n" , fileName);
+    char text[2000000];
     while (in != 'r')
     {
         in = getchar();
@@ -227,14 +226,15 @@ void insert(){
                 temp[j] = text[i];
                 j++;
             }
-            //else if(text[i+1] == '"'){
-                //i++;
-                //temp[j] = text[i];
-                //j++;
-            //}
+            else if(text[i+1] == '\"'){
+                i++; 
+                temp[j] = '\"';
+                j++;
+                continue;
+            }
         }
-        else if(text[i] == '"'){
-            i++;
+        else if(text[i] == '\"'){
+            continue;
         }
         else{
         temp[j] = text[i];

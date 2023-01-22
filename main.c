@@ -11,6 +11,7 @@ FILE *fopen_mkdir(char *path, char *mode);
 void rek_mkdir(char *path);
 void insert();
 void cat();
+void removestr();
 
 int main(){
 
@@ -41,6 +42,8 @@ int main(){
     
     else if(!(strcmp(command , "cat")))
         cat();
+    else if(!(strcmp(command , "removestr")))
+        removestr();
     }
 
 }
@@ -143,7 +146,7 @@ void insert(){
             in = getchar();
         }
     }
-    printf("---%s---\n" , fileName);
+    //printf("---%s---\n" , fileName);
     char text[2000000];
     while (in != 'r')
     {
@@ -277,4 +280,160 @@ void cat(){
     {
         printf("%c" , get);
     }    
+}
+
+void removestr(){
+    getchar();
+    getchar();
+    getchar();
+    getchar();
+    getchar();
+    getchar();
+    char in;
+    char fileName[100] = {'\0'};
+    in = getchar();
+    if(in == '\"'){
+        getchar();
+        for (int i = 0; ; i++)
+        {
+            in = getchar();
+            if(in == '\"')
+                break;
+            else{
+                fileName[i] = in;
+            }                
+        }
+    }
+    else{
+        in = getchar();
+        for (int i = 0; ; i++)
+        {
+            if(in == '-' || in == ' ')
+                break;
+            else 
+                fileName[i] = in;
+            in = getchar();
+        }
+    }
+
+    while ((in = getchar()) != 's')
+    {
+    }
+    
+    int line , x;
+    scanf(" %d:%d" , &line , &x);
+    while ((in = getchar()) != 'e')
+    {
+    }
+    int size;
+    scanf("%d" , &size);
+    while ((in = getchar()) != '-')
+    {
+    }
+    char direction = getchar();
+    FILE *file;
+    if(!(file = fopen(fileName , "r")))
+        printf("Bro File doesn't Exist :|\n");  
+    file = fopen(fileName , "r");
+    char temp[1000000];
+    int line_counter = 0;
+    char get , lstring[100];
+    int j = 0;
+
+    if(direction == 'f'){
+        while (line_counter < line - 1)
+        {
+                fscanf(file , "%[^\n]%*c" , lstring);
+                for (int f = 0; f < strlen(lstring); f++)
+                {
+                    temp[j] = lstring[f];
+                    j++;
+                }
+                temp[j] = '\n';
+                j++;
+                line_counter++;
+        }
+        for (int i = 0; i < x; i++)
+        {
+            get = fgetc(file);
+            temp[j] = get;
+            j++;
+        }
+        for (int i = 0; i < size ; i++)
+        {
+            get = fgetc(file);
+        }
+        while (get != EOF)
+        {
+            get = fgetc(file);
+            temp[j] = get;
+            j++;
+        }
+        fclose(file);
+        file = fopen(fileName , "w");
+        for (int i = 0; i < strlen(temp); i++)
+        {
+            fputc(temp[i] , file);
+        }
+        fclose(file);
+    }
+    else if(direction == 'b'){
+        char temp1[1000000] , temp2[1000000];
+        char temp3[2000000] = {'\0'}; 
+        int j1 = 0;
+        int line_counter = 0;
+        while (line_counter < line - 1)
+        {
+            char lstring[100] = {'\0'};
+            fscanf(file , "%[^\n]%*c" , lstring);
+            for (int f = 0; f < strlen(lstring); f++)
+            {
+                temp1[j1] = lstring[f];
+                j1++;
+            }
+            temp1[j1] = '\n';
+            j1++;
+            line_counter++;
+        }
+        for (int i = 0; i < x; i++)
+        {
+            get = fgetc(file);
+            temp1[j1] = get;
+            j1++;
+        }
+        int j2 = 0;
+        get = fgetc(file);
+        while (get != EOF)
+        {
+            temp2[j2] = get;
+            j2++;
+            get = fgetc(file);
+        }
+
+        int j3 = 0;
+        for (int f1 = 0; f1 < strlen(temp1) - size; f1++)
+        {
+            temp3[j3] = temp1[f1];
+            j3++;
+        }
+        for (int f1 = 0; f1 < strlen(temp2); f1++)
+        {
+            temp3[j3] = temp2[f1];
+            j3++;
+        }
+        fclose(file);
+        file = fopen(fileName , "w");        
+
+        if ( file )
+        {
+            fputs(temp3,file);
+            }
+        else
+            {
+                printf("Failed to open the file\n");
+                }
+
+
+        fclose(file);
+    }
 }

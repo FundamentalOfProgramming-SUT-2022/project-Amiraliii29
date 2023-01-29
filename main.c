@@ -15,6 +15,7 @@ void removestr();
 void copystr();
 void cutstr();
 void pastestr();
+void findstr();
 
 char clipboard[1000000];
 
@@ -55,6 +56,8 @@ int main(){
         cutstr();
     else if(!(strcmp(command , "pastestr")))
         pastestr();
+    else if(!(strcmp(command , "find")))
+        findstr();
     }
 
 }
@@ -779,14 +782,14 @@ void pastestr(){
             in = getchar();
         }
     }
-    printf("---%s---\n" , fileName);
+    //printf("---%s---\n" , fileName);
     do
     {
         in = getchar();
     } while (in != 's');
     int line , x;
     scanf(" %d:%d" , &line , &x);
-   printf("---%d : %d---\n" , line , x);
+    //printf("---%d : %d---\n" , line , x);
 
     FILE *file;
     if(!(file = fopen(fileName , "r")))
@@ -797,7 +800,6 @@ void pastestr(){
     int j = 0;
     while (line_counter < line - 1)
     {
-            //fscanf(file , "%[^\n]" ,lstring);
             fscanf(file , "%[^\n]%*c" , lstring);
             for (int f = 0; f < strlen(lstring); f++)
             {
@@ -806,7 +808,6 @@ void pastestr(){
             }
             temp[j] = '\n';
             j++;
-            //printf("1%s" , lstring);
             line_counter++;
     }
     for (int i = 0; i < x; i++)
@@ -835,4 +836,171 @@ void pastestr(){
         fputc(temp[i] , file);
     }
     fclose(file);
+}
+
+void findstr(){
+    char get;
+    int flagv = 0;
+    char attribute[100] = {'\0'};
+    char fileName[200] = {'\0'};
+    char tobefound[1000] = {'\0'};
+    char tobefounds[20][300] = {'\0'};
+    while((get = getchar()) != 'r'){
+    }
+    int wordnum = 0;
+    get = getchar();
+    /*if( get == '\"'){
+        int breakflag = 0;
+        for (wordnum = 0; ; )
+        {
+            for (int j = 0; ; j++)
+            {
+                get = getchar();
+                if(get == ' '){
+                    wordnum++;
+                    break;
+                }
+                else if(get == '\"'){
+                    breakflag = 1;
+                    break;
+                }
+                tobefounds[i][j] = get;
+                if(get )
+            }
+            if(breakflag == 1)
+                break; 
+        }        
+    }
+    else*/{
+        get = getchar();
+        for (int i = 0; ; i++)
+        {
+            if(get == ' ' || get =='-')
+                break;
+            else
+                tobefound[i] = get;
+            get = getchar();
+        }
+        //printf("---string:%s---\n" , tobefound);
+    }
+    while((get = getchar()) != 'e'){
+    }
+    getchar();
+    for (int i = 0; ; i++)
+    {
+        get = getchar();
+        if(get == '\n')
+            break;
+        else if(get == ' '){
+            flagv = 1;
+            break;
+        }
+        else 
+            fileName[i] = get;
+    }
+    //printf("---file name:%s---\n" , fileName);
+    if(flagv == 1){
+        getchar();
+        for (int i = 0 ; ; i++)
+        {
+            get = getchar();
+            if(get == '\n')
+                break;
+            else 
+                attribute[i] = get;
+        }
+        
+    }
+    FILE *fp;
+    char ch;
+    int count = 0;
+    int pos[30] , posw[30];
+    int pointer = 0;
+    int loop;
+
+    if((fp = fopen(fileName, "r")) == 0){
+        printf("file doesn't exist\n");
+        return;
+    }
+
+    do 
+    {
+        char word[50] = {'\0'};
+        ch = fscanf(fp, "%s", word);
+        //if(tobefound[0] == '*'){
+        //    word[0] = '*';
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        /* code */
+        //    }
+        //    
+        //}
+
+        for (int i = 0; i < strlen(tobefound); i++)
+        {
+            if(tobefound[i] == '\\' && tobefound[i+1] =='*'){
+                word[i] = '\\';
+                word[i+1] = '*';
+                //printf("tobefound:%s\n" , tobefound);
+                //printf("word:%s\n" , word);
+                break;
+            }
+            else if(tobefound[i] == '*'){
+                tobefound[i+1] = '\0';
+                word[i] = '*';
+                word[i+1] = '\0';
+                //printf("--tobefound:%s\n" , tobefound);
+                //printf("word:%s\n" , word);
+            }
+        }
+        
+        if(strcmp(word, tobefound) == 0)
+        {
+            pos[count] = pointer; 
+            posw[count] = wordnum;
+            count++;
+            
+        }
+        pointer += (strlen(word));
+        pointer++;
+        wordnum++;
+        //printf("%s ",word);       
+    } while (ch != EOF);
+
+    if(flagv == 0){
+        if(count == 0)  
+            printf("-1\n");
+        else
+            {
+            printf("'%s' starts from character number: ", tobefound);
+            printf("%d ", pos[0] + 1);
+
+            }
+    }
+    else if(!(strcmp(attribute , "count"))){
+        printf("this text has been repeated %d times\n" , count);
+    }
+    else if(!(strcmp(attribute , "at"))){
+        int n;
+        scanf("%d" , &n);
+        if(n > count)
+            printf("-1\n");
+        else
+            printf("the %dthtime that text repeated starts from character number: %d" , n , pos[n-1] + 1 );
+    }
+    else if(!(strcmp(attribute , "byword"))){
+        if(count == 0)
+            printf("-1\n");
+        else
+            printf("%s starts from word number: %d\n" , tobefound ,  posw[0] + 1);
+    }
+    else if(!(strcmp(attribute , "all"))){
+        for (int i = 0; i < strlen(pos) ; i++)
+        {
+            printf("'%s' starts from character number: ", tobefound);
+            printf("%d ", pos[i] + 1);
+        }
+    }
+
+    fclose(fp);
 }

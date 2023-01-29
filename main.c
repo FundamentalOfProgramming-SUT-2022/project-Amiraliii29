@@ -17,6 +17,7 @@ void cutstr();
 void pastestr();
 void findstr();
 void replacestr();
+void grep();
 
 char clipboard[1000000];
 
@@ -61,6 +62,8 @@ int main(){
         findstr();
     else if(!(strcmp(command , "replace")))
         replacestr();
+    else if(!(strcmp(command , "grep")))
+        grep();
     }
 
 }
@@ -1269,5 +1272,70 @@ void replacestr(){
             fputc(string[i] , fp);
         }
         fclose(fp);
+    }
+}
+
+void grep(){
+    char get;
+    char fileName[200] = {'\0'};
+    char pattern[1000] = {'\0'};
+    int cop = 0;
+    int lop = 0;
+    int endflag = 0 ;
+    int copCounter = 0;
+    while((get = getchar()) != '-'){
+    }
+    get = getchar();
+    if(get == 'c')
+        cop = 1;
+    else if(get == 'l')
+        lop = 1;
+    while((get = getchar()) != '\"'){
+    }
+    for(int i  = 0; ; i++){
+        get = getchar();
+        if(get == '\"')
+            break;
+        pattern[i] = get;
+    }
+    //printf("---pattern:%s\n" , pattern);
+    while((get = getchar()) != 's'){
+    }
+    getchar();
+    while(1){
+            get = getchar();
+        for (int i = 0; ; i++)
+        {
+            if(get == ' ')
+                break;
+            else if(get == '\n'){
+                endflag = 1;
+                break;
+            }
+            fileName[i] = get;
+            get = getchar();
+        }
+        //printf("\n---file name:%s\n" , fileName);
+        FILE *fp;
+        char temp[10000] = {'\0'};
+        fp = fopen(fileName,"r");
+        while(!feof(fp))
+        {
+            fgets(temp,1000,fp);
+            if(strstr(temp,pattern)!= NULL){
+                if(cop == 1)
+                    copCounter++;
+                else if(lop == 1)
+                    printf("%s\n" , fileName);
+                else
+                    printf("%s: %s",fileName ,temp);
+            }
+        }
+        fclose(fp);
+        if(endflag == 1){
+            if(cop == 1)
+                printf("%d\n" , copCounter);
+            return;
+        }
     }
 }

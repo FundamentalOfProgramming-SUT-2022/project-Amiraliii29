@@ -16,6 +16,7 @@ void copystr();
 void cutstr();
 void pastestr();
 void findstr();
+void replacestr();
 
 char clipboard[1000000];
 
@@ -58,6 +59,8 @@ int main(){
         pastestr();
     else if(!(strcmp(command , "find")))
         findstr();
+    else if(!(strcmp(command , "replace")))
+        replacestr();
     }
 
 }
@@ -276,7 +279,7 @@ void insert(){
 
 void cat(){
     char get;
-    char fileName[1024];
+    char fileName[1024] = {'\0'};
     while((get = getchar()) != 'e'){
     }
     getchar();
@@ -289,14 +292,14 @@ void cat(){
             fileName[i] = get;
     }
     FILE *fp;
-    printf("%s\n" , fileName);
     if(!(fp = fopen(fileName , "r")))
         printf("file doesn't exist :|\n");
 
     while ((get = fgetc(fp)) != EOF)
     {
         printf("%c" , get);
-    }    
+    }
+    fclose(fp);
 }
 
 void removestr(){
@@ -995,7 +998,7 @@ void findstr(){
             printf("%s starts from word number: %d\n" , tobefound ,  posw[0] + 1);
     }
     else if(!(strcmp(attribute , "all"))){
-        for (int i = 0; i < strlen(pos) ; i++)
+        for (int i = 0; i < count ; i++)
         {
             printf("'%s' starts from character number: ", tobefound);
             printf("%d ", pos[i] + 1);
@@ -1003,4 +1006,268 @@ void findstr(){
     }
 
     fclose(fp);
+}
+
+void replacestr(){
+    char get;
+    int flagv = 0;
+    char attribute[100] = {'\0'};
+    char fileName[200] = {'\0'};
+    char tobefound[1000] = {'\0'};
+    char toreplace[1000] = {'\0'};
+    char tobefounds[20][300] = {'\0'};
+    while((get = getchar()) != '1'){
+    }
+    get = getchar();
+    /*if( get == '\"'){
+        int breakflag = 0;
+        for (wordnum = 0; ; )
+        {
+            for (int j = 0; ; j++)
+            {
+                get = getchar();
+                if(get == ' '){
+                    wordnum++;
+                    break;
+                }
+                else if(get == '\"'){
+                    breakflag = 1;
+                    break;
+                }
+                tobefounds[i][j] = get;
+                if(get )
+            }
+            if(breakflag == 1)
+                break; 
+        }        
+    }
+    else*/{
+        get = getchar();
+        for (int i = 0; ; i++)
+        {
+            if(get == ' ' || get =='-')
+                break;
+            else
+                tobefound[i] = get;
+            get = getchar();
+        }
+        printf("---string:%s---\n" , tobefound);
+    }
+    while((get = getchar()) != '2'){
+    }
+        getchar();
+        get = getchar();
+        for (int i = 0; ; i++)
+        {
+            if(get == ' ' || get =='-')
+                break;
+            else
+                toreplace[i] = get;
+            get = getchar();
+        }
+        printf("---string:%s---\n" , toreplace);
+
+    while((get = getchar()) != 'e'){
+    }
+    getchar();
+    for (int i = 0; ; i++)
+    {
+        get = getchar();
+        if(get == '\n')
+            break;
+        else if(get == ' '){
+            flagv = 1;
+            break;
+        }
+        else 
+            fileName[i] = get;
+    }
+    //printf("---file name:%s---\n" , fileName);
+    if(flagv == 1){
+        getchar();
+        for (int i = 0 ; ; i++)
+        {
+            get = getchar();
+            if(get == '\n')
+                break;
+            if(get == ' '){
+                break;
+            }
+            else 
+                attribute[i] = get;
+        }
+    }
+    FILE *fp;
+    char ch;
+    int count = 0;
+    int pos[30];
+    int pointer = 0;
+    int loop;
+    char word[50] = {'\0'};
+    if((fp = fopen(fileName, "r")) == 0){
+        printf("file doesn't exist\n");
+        return;
+    }
+    int wordLength[100000];
+    int cc = 0;
+    int fc[100] = {0};
+    do 
+    {
+
+        ch = fscanf(fp, "%s", word);
+        wordLength[cc] = strlen(word);
+        //if(tobefound[0] == '*'){
+        //    word[0] = '*';
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        /* code */
+        //    }
+        //    
+        //}
+
+        for (int i = 0; i < strlen(tobefound); i++)
+        {
+            if(tobefound[i] == '\\' && tobefound[i+1] =='*'){
+                word[i] = '\\';
+                word[i+1] = '*';
+                //printf("tobefound:%s\n" , tobefound);
+                //printf("word:%s\n" , word);
+                break;
+            }
+            else if(tobefound[i] == '*'){
+                tobefound[i+1] = '\0';
+                word[i] = '*';
+                word[i+1] = '\0';
+                //printf("--tobefound:%s\n" , tobefound);
+                //printf("word:%s\n" , word);
+            }
+        }
+        
+        if(strcmp(word, tobefound) == 0)
+        {
+            pos[count] = pointer; 
+            fc[count] = cc;
+            //printf("%d\n" , pos[count]);
+            count++;
+        }
+        pointer += wordLength[cc];
+        cc++;
+        pointer++;
+        //printf("%s ",word);       
+    } while (ch != EOF);
+
+    fclose(fp);
+    char string[1000000] = {'\0'};
+    if((!strcmp(attribute , "all"))){
+        while ((get = getchar()) != '\n')
+        {
+            if(get == '-'){
+                printf("you cannot use both 'all' and 'at'\n");
+                return;
+            }
+        }
+        
+        for (int n = 1 ; n <= count ; n++)
+        { 
+        char get;
+        int j = 0;
+        fopen(fileName , "r");
+        printf("pos: %d\n" , pos[n-1]);
+        for (int i = 0; i < pos[n-1] ; i++)
+        {
+            get = fgetc(fp);
+            //printf("1:%c" , get);
+            string[j] = get;
+            j++;
+        } 
+        printf("%d - %d" , wordLength[fc[n-1]] , fc[n-1] );
+        for (int i = 0; i < wordLength[fc[n-1]]; i++)
+        {
+            get = fgetc(fp);
+            printf("%c" , get);
+        }
+        printf("\n");
+        for (int i = 0 ;  i < strlen(toreplace); i++)
+        {
+            string[j] = toreplace[i];
+            j++;
+        }
+        for (int i = 0; ; i++)
+        {
+            get = fgetc(fp);
+            if(get == EOF)
+                break;
+            string[j] = get;
+            j++;
+        }
+        //printf("%s" , string); 
+        fclose(fp);
+        fopen(fileName , "w");
+        for (int i = 0; i < strlen(string) ; i++)
+        {
+            fputc(string[i] , fp);
+        }
+        fclose(fp);
+    }
+    }
+    else {
+        int n;
+        if(!(strcmp(attribute , "at"))){
+            scanf("%d" , &n);
+            while ((get = getchar()) != '\n')
+            {
+                if(get == '-'){
+                    printf("you cannot use both 'all' and 'at'\n");
+                    return;
+                }
+            }
+        
+        }
+        else if(flagv == 0)
+            n = 1;
+        //printf("n: %d\n" , n);
+        //printf("count: %d\n" , count);
+        if(n > count){
+            printf("text has not been repeated %d times\n" , n );
+            return;
+        }
+        char get;
+        int j = 0;
+        printf("pos: %d\n" , pos[n-1]);
+        for (int i = 0; i < pos[n-1] ; i++)
+        {
+            get = fgetc(fp);
+            //printf("1:%c" , get);
+            string[j] = get;
+            j++;
+        } 
+        printf("%d - %d" , wordLength[fc[n-1]] , fc[n-1] );
+        for (int i = 0; i < wordLength[fc[n-1]]; i++)
+        {
+            get = fgetc(fp);
+            printf("%c" , get);
+        }
+        printf("\n");
+        for (int i = 0 ;  i < strlen(toreplace); i++)
+        {
+            string[j] = toreplace[i];
+            j++;
+        }
+        for (int i = 0; ; i++)
+        {
+            get = fgetc(fp);
+            if(get == EOF)
+                break;
+            string[j] = get;
+            j++;
+        }
+        //printf("%s" , string); 
+        fclose(fp);
+        fopen(fileName , "w");
+        for (int i = 0; i < strlen(string) ; i++)
+        {
+            fputc(string[i] , fp);
+        }
+        fclose(fp);
+    }
 }

@@ -19,6 +19,7 @@ void findstr();
 void replacestr();
 void grep();
 void autoindent();
+void compare();
 
 char clipboard[1000000];
 
@@ -67,6 +68,8 @@ int main(){
         grep();
     else if(!(strcmp(command , "auto")))
         autoindent();
+    else if(!(strcmp(command , "compare")))
+        compare();
     
     }
 
@@ -1430,4 +1433,109 @@ void autoindent(){
         fputc(string[i] , fp);
     }
     fclose(fp);
+}
+
+void compare(){
+    char get;
+    char fileName_1[100] = {'\0'};
+    char fileName_2[100] = {'\0'};
+    int line_counter = 0 , flag1 = 1 , flag2 = 1;
+    for (int i = 0; ; i++)
+    {
+        get = getchar();
+        if(get == ' ')
+            break;
+        fileName_1[i] = get;
+    }
+    for (int i = 0; ; i++)
+    {
+        get = getchar();
+        if(get == '\n')
+            break;
+        fileName_2[i] = get;
+    }
+    printf("%s -- %s\n" , fileName_1 , fileName_2);
+    
+    FILE *file_1 , *file_2;
+    file_1 = fopen(fileName_1 , "r");
+    file_2 = fopen(fileName_2 , "r");
+    while (1)
+    {
+        char line_1[200] = {'\0'};
+        char line_2[200] = {'\0'};
+        fscanf(file_1 , "%[^\n]%*c" , line_1);
+        fscanf(file_2 , "%[^\n]%*c" , line_2);
+        if(strlen(line_1) == 0)
+            flag1 = 0;
+        if(strlen(line_2) == 0)
+            flag2 = 0;
+        if(flag1 == 0 || flag2 == 0)
+            break;
+        line_counter++;
+        
+        if(strcmp(line_1 , line_2) != 0){
+            printf("============#%d============\n" , line_counter);
+            printf("%s\n" , line_1);
+            printf("%s\n" , line_2);
+        }
+    }
+
+    if(flag1 == 1){
+        int same = line_counter;
+        line_counter++;
+        printf("<<<<<<<<<<<< #%d" , line_counter);
+        char line_1[200] = {'\0'};
+
+        for (int i = 0; ; i++)
+        {
+            fscanf(file_1 , "%[^\n]%*c" , line_1);
+            if(strlen(line_1) == 0){
+                printf(" - #%d <<<<<<<<<<<<\n" , line_counter);
+                break;
+            }
+            line_counter++;
+        }
+        fclose(file_1);
+        file_1 = fopen(fileName_1 , "r");
+        for (int i = 0; i < same; i++)
+        {
+            fscanf(file_1 , "%[^\n]%*c" , line_1);
+        }
+        while((get = fgetc(file_1)) != EOF){
+            printf("%c" , get);
+        }
+        fclose(file_1);
+    }
+    else if(flag2 == 1){
+        int same = line_counter;
+        line_counter++;
+        printf(">>>>>>>>>>>> #%d" , line_counter);
+        char line_2[200] = {'\0'};
+
+        for (int i = 0; ; i++)
+        {
+            fscanf(file_2 , "%[^\n]%*c" , line_2);
+            if(strlen(line_2) == 0){
+                printf(" - #%d >>>>>>>>>>>>\n" , line_counter);
+                break;
+            }
+            line_counter++;
+        }
+        fclose(file_2);
+        file_2 = fopen(fileName_2 , "r");
+        for (int i = 0; i < same; i++)
+        {
+            fscanf(file_2 , "%[^\n]%*c" , line_2);
+        }
+        while((get = fgetc(file_2)) != EOF){
+            printf("%c" , get);
+        }
+        fclose(file_2);
+    }
+    
+    else{
+        fclose(file_1);
+        fclose(file_2);
+    }
+
 }

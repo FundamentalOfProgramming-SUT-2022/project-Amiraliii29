@@ -1,4 +1,5 @@
-#include <stdio.h> 
+#include <stdio.h>
+#include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -20,13 +21,19 @@ void replacestr();
 void grep();
 void autoindent();
 void compare();
+void directoryTree(char * , int);
+void undo();
 
 char clipboard[1000000];
+int callcounter = 0;
 
 int main(){
 
     printf("Welcome to sheikh vim :)\n");
     printf("please type \"exit\" to stop program\n");
+    FILE *hidden;
+    hidden = fopen(".hidden.txt" , "w");
+    fclose(hidden);
 
     char input;
 
@@ -47,7 +54,7 @@ int main(){
         createfile();
     else if(!(strcmp(command , "exit")))
         return 0;
-    else if(!(strcmp(command , "insertr")))
+    else if(!(strcmp(command , "insertstr")))
         insert();
     
     else if(!(strcmp(command , "cat")))
@@ -70,7 +77,12 @@ int main(){
         autoindent();
     else if(!(strcmp(command , "compare")))
         compare();
-    
+    else if(!(strcmp(command , "undo")))
+        undo();
+    else if(!(strcmp(command , "tree"))){
+        directoryTree("." , 0);
+        callcounter = 1;
+    }
     }
 
 }
@@ -276,6 +288,17 @@ void insert(){
         j++;
     }
     fclose(file);
+
+    file = fopen(fileName , "r");
+    FILE *hidden;
+    hidden = fopen(".hidden.txt" , "w");
+    char c;
+    while((c = fgetc(file)) != EOF){
+        fputc(c , hidden);
+    }
+    fclose(file);
+    fclose(hidden);
+    
     file = fopen(fileName , "w");
     for (int i = 0; i < strlen(temp); i++)
     {
@@ -397,6 +420,17 @@ void removestr(){
             j++;
         }
         fclose(file);
+
+        file = fopen(fileName , "r");
+        FILE *hidden;
+        hidden = fopen(".hidden.txt" , "w");
+        char c;
+        while((c = fgetc(file)) != EOF){
+            fputc(c , hidden);
+        }
+        fclose(file);
+        fclose(hidden);
+
         file = fopen(fileName , "w");
         for (int i = 0; i < strlen(temp); i++)
         {
@@ -449,6 +483,18 @@ void removestr(){
             j3++;
         }
         fclose(file);
+
+
+        file = fopen(fileName , "r");
+        FILE *hidden;
+        hidden = fopen(".hidden.txt" , "w");
+        char c;
+        while((c = fgetc(file)) != EOF){
+            fputc(c , hidden);
+        }
+        fclose(file);
+        fclose(hidden);
+
         file = fopen(fileName , "w");        
 
         if ( file )
@@ -690,6 +736,17 @@ void cutstr(){
             j++;
         }
         fclose(file);
+
+        file = fopen(fileName , "r");
+        FILE *hidden;
+        hidden = fopen(".hidden.txt" , "w");
+        char c;
+        while((c = fgetc(file)) != EOF){
+            fputc(c , hidden);
+        }
+        fclose(file);
+        fclose(hidden);
+
         file = fopen(fileName , "w");
         for (int i = 0; i < strlen(temp) ; i++)
         {
@@ -753,6 +810,17 @@ void cutstr(){
             j3++;
         }
         fclose(file);
+
+        file = fopen(fileName , "r");
+        FILE *hidden;
+        hidden = fopen(".hidden.txt" , "w");
+        char c;
+        while((c = fgetc(file)) != EOF){
+            fputc(c , hidden);
+        }
+        fclose(file);
+        fclose(hidden);
+
         file = fopen(fileName , "w");
         for (int i = 0; i < strlen(temp3); i++)
         {
@@ -840,6 +908,17 @@ void pastestr(){
         j++;
     }
     fclose(file);
+
+    file = fopen(fileName , "r");
+    FILE *hidden;
+    hidden = fopen(".hidden.txt" , "w");
+    char c;
+    while((c = fgetc(file)) != EOF){
+        fputc(c , hidden);
+    }
+    fclose(file);
+    fclose(hidden);
+
     file = fopen(fileName , "w");
     for (int i = 0; i < strlen(temp); i++)
     {
@@ -1246,6 +1325,17 @@ void replacestr(){
         }
         //printf("%s" , string); 
         fclose(fp);
+
+        fp = fopen(fileName , "r");
+        FILE *hidden;
+        hidden = fopen(".hidden.txt" , "w");
+        char c;
+        while((c = fgetc(fp)) != EOF){
+            fputc(c , hidden);
+        }
+        fclose(fp);
+        fclose(hidden);
+
         fopen(fileName , "w");
         for (int i = 0; i < strlen(string) ; i++)
         {
@@ -1307,6 +1397,17 @@ void replacestr(){
         }
         //printf("%s" , string); 
         fclose(fp);
+
+        fp = fopen(fileName , "r");
+        FILE *hidden;
+        hidden = fopen(".hidden.txt" , "w");
+        char c;
+        while((c = fgetc(fp)) != EOF){
+            fputc(c , hidden);
+        }
+        fclose(fp);
+        fclose(hidden);
+
         fopen(fileName , "w"); 
         for (int i = 0; i < strlen(string) ; i++)
         {
@@ -1463,7 +1564,17 @@ void autoindent(){
         }
     }
     fclose(fp);
-    printf("%s" , string);
+
+    fp = fopen(fileName , "r");
+    FILE *hidden;
+    hidden = fopen(".hidden.txt" , "w");
+    char c;
+    while((c = fgetc(fp)) != EOF){
+        fputc(c , hidden);
+    }
+    fclose(fp);
+    fclose(hidden);
+
     fp = fopen(fileName , "w");
 
     for (int i = 0; i < strlen(string); i++)
@@ -1575,4 +1686,77 @@ void compare(){
         fclose(file_1);
         fclose(file_2);
     }
+}
+
+void directoryTree(char *name , int indent){
+    static int depth;
+    int depthConter = 0;
+    if(callcounter == 1){
+    scanf("%d" , &depth);
+    if(depth < -1){
+        printf("invalid depth please try again\n");
+        return;
+    }
+    else if(depth == -1)
+        depth = 1000;
+    }
+    DIR *dir;
+    struct dirent *entry;
+
+    if (!(dir = opendir(name)))
+        return;
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type == DT_DIR) {
+            char path[1024];
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+            snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+            printf("%*s[%s]\n", indent, "", entry->d_name);
+            if(callcounter < depth){
+                directoryTree(path, indent + 2);
+                callcounter++;
+            }
+        } else {
+            printf("%*s- %s\n", indent, "", entry->d_name);
+        }
+    }
+    closedir(dir);
+}
+
+void undo(){
+    char get;
+    char fileName[100] = {'\0'};
+
+    while ((get = getchar()) != 'e')
+    {
+    }
+    getchar();
+
+    for (int i = 0; ; i++)
+    {
+        get = getchar();
+        if(get == '\n')
+            break;
+        fileName[i] = get;
+    }
+    
+    FILE *hidden , *fp;
+    hidden = fopen(".hidden.txt" , "r");
+    if((get = fgetc(hidden)) == EOF){
+        printf("There is no action to undo\n");
+        return;
+    }
+    if(!(fp = fopen(fileName , "w")))
+        printf("file doesn't exist\n");
+    while (1)
+    {
+        if(get == EOF)
+            break;
+        fputc(get , fp);
+        get = fgetc(hidden);
+    }
+    fclose(fp);
+    fclose(hidden);
+    printf("Undoed successfully\n");
 }

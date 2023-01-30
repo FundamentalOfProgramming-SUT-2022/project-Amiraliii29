@@ -946,8 +946,27 @@ void findstr(){
         //    
         //}
 
+        if(tobefound[0] == '*'){
+            int m ;
+            //printf("to be found: %s\n" , tobefound);
+            for (int j = 0; j < strlen(word); j++)
+            {
+                if(word[j] == tobefound[1] && word[j+1] == tobefound[2])
+                    m = j;
+            }
+            int mf = 1;
+            word[0] = '*';
+            for (int k =  m ; k < strlen(word); k++)
+            {
+                word[mf] = word[k];
+                mf++;
+            }
+            word[mf] = '\0';
+            //printf("word: %s\n" , word);
+        }
+        else{
         for (int i = 0; i < strlen(tobefound); i++)
-        {
+        {   
             if(tobefound[i] == '\\' && tobefound[i+1] =='*'){
                 word[i] = '\\';
                 word[i+1] = '*';
@@ -962,6 +981,7 @@ void findstr(){
                 //printf("--tobefound:%s\n" , tobefound);
                 //printf("word:%s\n" , word);
             }
+        }
         }
         
         if(strcmp(word, tobefound) == 0)
@@ -1058,7 +1078,7 @@ void replacestr(){
                 tobefound[i] = get;
             get = getchar();
         }
-        printf("---string:%s---\n" , tobefound);
+        //printf("---string:%s---\n" , tobefound);
     }
     while((get = getchar()) != '2'){
     }
@@ -1072,7 +1092,7 @@ void replacestr(){
                 toreplace[i] = get;
             get = getchar();
         }
-        printf("---string:%s---\n" , toreplace);
+        //printf("---string:%s---\n" , toreplace);
 
     while((get = getchar()) != 'e'){
     }
@@ -1123,15 +1143,35 @@ void replacestr(){
 
         ch = fscanf(fp, "%s", word);
         wordLength[cc] = strlen(word);
-        //if(tobefound[0] == '*'){
-        //    word[0] = '*';
-        //    for (int i = 0; i < count; i++)
-        //    {
-        //        /* code */
-        //    }
-        //    
-        //}
+        if(tobefound[0] == '*'){
+            int m ;
+            int fl = 0 ;
+            //printf("to be found: %s\n" , tobefound);
+            for (int j = 0; j < strlen(word); j++)
+            {
+                if(word[j] == tobefound[1] && word[j+1] == tobefound[2]){
+                    m = j;
+                    fl = 1;
+                }
+            }
+            if(fl == 0){
+                pointer += wordLength[cc];
+                cc++;
+                pointer++;
+                continue;
+            }
+            int mf = 1;
+            word[0] = '*';
+            for (int k =  m ; k < strlen(word); k++)
+            {
+                word[mf] = word[k];
+                mf++;
+            }
+            word[mf] = '\0';
+            //printf("word: %s\n" , word);
+        }
 
+        else{
         for (int i = 0; i < strlen(tobefound); i++)
         {
             if(tobefound[i] == '\\' && tobefound[i+1] =='*'){
@@ -1149,7 +1189,9 @@ void replacestr(){
                 //printf("word:%s\n" , word);
             }
         }
-        
+        }
+        //printf("tobefound:%s\n" , tobefound);
+        //printf("word:%s\n" , word);
         if(strcmp(word, tobefound) == 0)
         {
             pos[count] = pointer; 
@@ -1166,34 +1208,29 @@ void replacestr(){
     fclose(fp);
     char string[1000000] = {'\0'};
     if((!strcmp(attribute , "all"))){
-        while ((get = getchar()) != '\n')
-        {
-            if(get == '-'){
-                printf("you cannot use both 'all' and 'at'\n");
-                return;
-            }
-        }
         
-        for (int n = 1 ; n <= count ; n++)
+        for (int f = 1 ; f <= count ; f++)
         { 
+        
         char get;
         int j = 0;
-        fopen(fileName , "r");
-        printf("pos: %d\n" , pos[n-1]);
-        for (int i = 0; i < pos[n-1] ; i++)
+        char string[1000000] = {'\0'};
+        fp = fopen(fileName , "r");
+        //printf("pos: %d\n" , pos[f-1]);
+        for (int i = 0; i < pos[f-1] - ((wordLength[fc[f-1]] - strlen(toreplace)) * (f-1)); i++)
         {
             get = fgetc(fp);
             //printf("1:%c" , get);
             string[j] = get;
             j++;
         } 
-        printf("%d - %d" , wordLength[fc[n-1]] , fc[n-1] );
-        for (int i = 0; i < wordLength[fc[n-1]]; i++)
+        //printf("%d - %d" , wordLength[fc[f-1]] , fc[f-1] );
+        for (int i = 0; i < wordLength[fc[f-1]]; i++)
         {
             get = fgetc(fp);
-            printf("%c" , get);
+            //printf("%c" , get);
         }
-        printf("\n");
+        //printf("\n");
         for (int i = 0 ;  i < strlen(toreplace); i++)
         {
             string[j] = toreplace[i];
@@ -1228,7 +1265,6 @@ void replacestr(){
                     return;
                 }
             }
-        
         }
         else if(flagv == 0)
             n = 1;
@@ -1239,8 +1275,9 @@ void replacestr(){
             return;
         }
         char get;
+        fp = fopen(fileName , "r");
         int j = 0;
-        printf("pos: %d\n" , pos[n-1]);
+        //printf("pos: %d\n" , pos[n-1]);
         for (int i = 0; i < pos[n-1] ; i++)
         {
             get = fgetc(fp);
@@ -1248,13 +1285,13 @@ void replacestr(){
             string[j] = get;
             j++;
         } 
-        printf("%d - %d" , wordLength[fc[n-1]] , fc[n-1] );
+        //printf("%d - %d" , wordLength[fc[n-1]] , fc[n-1] );
         for (int i = 0; i < wordLength[fc[n-1]]; i++)
         {
             get = fgetc(fp);
-            printf("%c" , get);
+            //printf("%c" , get);
         }
-        printf("\n");
+        //printf("\n");
         for (int i = 0 ;  i < strlen(toreplace); i++)
         {
             string[j] = toreplace[i];
@@ -1270,13 +1307,14 @@ void replacestr(){
         }
         //printf("%s" , string); 
         fclose(fp);
-        fopen(fileName , "w");
+        fopen(fileName , "w"); 
         for (int i = 0; i < strlen(string) ; i++)
         {
             fputc(string[i] , fp);
         }
         fclose(fp);
     }
+    printf("text replaced successfully\n");
 }
 
 void grep(){
@@ -1537,5 +1575,4 @@ void compare(){
         fclose(file_1);
         fclose(file_2);
     }
-
 }

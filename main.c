@@ -18,6 +18,7 @@ void pastestr();
 void findstr();
 void replacestr();
 void grep();
+void autoindent();
 
 char clipboard[1000000];
 
@@ -64,17 +65,17 @@ int main(){
         replacestr();
     else if(!(strcmp(command , "grep")))
         grep();
+    else if(!(strcmp(command , "auto")))
+        autoindent();
+    
     }
 
 }
 
 void createfile(){
-    getchar();
-    getchar();
-    getchar();
-    getchar();
-    getchar();
-    getchar();
+    char get;
+    while((get = getchar()) != 'e'){
+    }
     char in;
     char fileName[100] = {'\0'};
     in = getchar();
@@ -1338,4 +1339,95 @@ void grep(){
             return;
         }
     }
+}
+
+void autoindent(){
+    char get ;
+    int flag = 0;
+    char fileName[100] = {'\0'};
+    char string[100000] = {'\0'};
+    while ((get = getchar()) != '/')
+    {
+    }
+    for (int i = 0; ; i++)
+    {
+        get = getchar();
+        if(get == '\n')
+            break;
+            fileName[i] = get;
+    }
+    //printf("%s" , fileName);
+    FILE *fp;
+    fp = fopen(fileName , "r");
+
+    for (int i = 0; ; i++)
+    {
+        get = fgetc(fp);
+       //printf("1:%c" , get);
+       if(string[i-1] == '\n' && get != '}'){
+        for (int j = 0; j < flag * 4; j++)
+        {
+            string[i] = ' ';
+            i++;
+        }
+       }
+        if(get == EOF)
+            break;
+        else if(get == '{'){
+            flag++;
+            //printf("{ detected\n");
+            if(i > 0 && string[i-1] != ' ' && string[i-1] != '\n'){
+                string[i] = ' '; i++;
+            }
+            string[i] = '{'; i++;
+            string[i] = '\n'; //i++;
+            //string[i] = ' '; i++;
+            //string[i] = ' '; i++;
+            //string[i] = ' '; i++;
+            //string[i] = ' ';
+            //printf("2:%s\n" , string);
+        }
+        else if(get == '}'){
+            flag--;
+            //printf("} detected\n");
+            if(string[i-1] == '\n'){
+            }
+            else if( string[i-1] == ' ' && string[i-2] == ' ' && string[i-3] == ' ' && string[i-4] == ' '){
+                if(flag == 0){
+                    string[i-1] = '\0';
+                    string[i-2] = '\0';
+                    string[i-3] = '\0';
+                    string[i-4] = '\0';
+                    i -= 4;
+                }
+            }
+            else{
+                string[i] = '\n'; i++;
+            }
+            for (int j = 0; j < flag * 4; j++)
+            {
+                string[i] = ' ';
+                i++;
+            }
+            string[i] = '}'; i++;
+            string[i] = '\n';
+            //printf("3:%s" , string);
+        }
+        else{
+        if(get == ' ' &&  string[i-1] == ' ' && string[i-2] == ' ' && string[i-3] == ' ' && string[i-4] == ' '){
+            i--;
+        }
+        else
+            string[i] = get;
+        }
+    }
+    fclose(fp);
+    printf("%s" , string);
+    fp = fopen(fileName , "w");
+
+    for (int i = 0; i < strlen(string); i++)
+    {
+        fputc(string[i] , fp);
+    }
+    fclose(fp);
 }

@@ -21,7 +21,7 @@ void replacestr();
 void grep();
 void autoindent();
 void compare();
-void directoryTree(char * , int);
+void tree(char * , int , int);
 void undo();
 
 char clipboard[1000000];
@@ -80,7 +80,7 @@ int main(){
     else if(!(strcmp(command , "undo")))
         undo();
     else if(!(strcmp(command , "tree"))){
-        directoryTree("." , 0);
+        tree("." , 0 , 0);
         callcounter = 1;
     }
     }
@@ -934,33 +934,42 @@ void findstr(){
     char fileName[200] = {'\0'};
     char tobefound[1000] = {'\0'};
     char tobefounds[20][300] = {'\0'};
+    int qoutflag = 0;
+    int wordnum = 0;
     while((get = getchar()) != 'r'){
     }
-    int wordnum = 0;
+    int wordnumber;
     get = getchar();
-    /*if( get == '\"'){
-        int breakflag = 0;
-        for (wordnum = 0; ; )
+    if( get == '\"'){
+        int breakflag = 0; 
+        qoutflag = 1;
+        for (wordnumber = 0 ; ; )
         {
             for (int j = 0; ; j++)
             {
                 get = getchar();
                 if(get == ' '){
-                    wordnum++;
+                    wordnumber++;
                     break;
                 }
                 else if(get == '\"'){
+                    wordnumber++;
                     breakflag = 1;
                     break;
                 }
-                tobefounds[i][j] = get;
-                if(get )
+                //printf("%c" , get);
+                tobefounds[wordnumber][j] = get;
             }
             if(breakflag == 1)
                 break; 
-        }        
+        }  
+        //printf("%d" , wordnum);
+        for (int i = 0; i < wordnumber ; i++)
+        {
+            printf("%s " , tobefounds[i]);
+        }   
     }
-    else*/{
+    else {
         get = getchar();
         for (int i = 0; ; i++)
         {
@@ -1011,19 +1020,133 @@ void findstr(){
         printf("file doesn't exist\n");
         return;
     }
+    /*if(qoutflag == 1){
+        int posMemory[300] = {0};
+        printf("wordnum: %d\n" , wordnumber);
+        for (int wc = 0 ; wc < wordnumber; wc++)
+        {
+            int pointer = 0;
+            fclose(fp);
+            fp = fopen(fileName , "r");
+            printf("wordnum: %d\n" , wordnumber);
+            int fj = 0;
+            for ( fj = 0; fj < strlen(tobefounds[wc]); fj++)
+            {
+                tobefound[fj] = tobefounds[wc][fj];
+            }
+            tobefound[fj] = '\0';
+            printf("tobefound: %s\n" , tobefound);
+            do 
+            {
+                char word[50] = {'\0'};
+                ch = fscanf(fp, "%s", word);
 
+                if(tobefound[0] == '*'){
+                    int m ;
+                    //printf("to be found: %s\n" , tobefound);
+                    for (int j = 0; j < strlen(word); j++)
+                    {
+                        if(word[j] == tobefound[1] && word[j+1] == tobefound[2])
+                            m = j;
+                    }
+                    int mf = 1;
+                    word[0] = '*';
+                    for (int k =  m ; k < strlen(word); k++)
+                    {
+                        word[mf] = word[k];
+                        mf++;
+                    }
+                    word[mf] = '\0';
+                    //printf("word: %s\n" , word);
+                }
+                else{
+                for (int i = 0; i < strlen(tobefound); i++)
+                {   
+                    if(tobefound[i] == '\\' && tobefound[i+1] =='*'){
+                        word[i] = '\\';
+                        word[i+1] = '*';
+                        //printf("tobefound:%s\n" , tobefound);
+                        //printf("word:%s\n" , word);
+                        break;
+                    }
+                    else if(tobefound[i] == '*'){
+                        tobefound[i+1] = '\0';
+                        word[i] = '*';
+                        word[i+1] = '\0';
+                        //printf("--tobefound:%s\n" , tobefound);
+                        //printf("word:%s\n" , word);
+                    }
+                }
+                }
+                
+                if(strcmp(word, tobefound) == 0)
+                {
+                    pos[count] = pointer; 
+                    count++;
+                    
+                }
+                pointer += (strlen(word));
+                pointer++;
+                //printf("%s ",word);       
+            } while (ch != EOF);
+            printf("%d - %d\n" , pos[wc] , wc);
+            posMemory[wc] = pos[wc];
+        }
+
+        for (int i = 1 ; i < wordnumber; i++)
+        {
+            printf("%d %d" , posMemory[i] , posMemory[i-1]);
+            if(posMemory[i] != (posMemory[i-1] + strlen(tobefounds[i-1]) +1 ) ){
+                printf("text not found in file\n");
+                return;
+            }
+        }
+
+        printf("text starts from character number: %d\n" , posMemory[0]); 
+        
+
+        if(flagv == 0){
+            if(count == 0)  
+                printf("-1\n");
+            else
+                {
+                printf("'%s' starts from character number: ", tobefound);
+                printf("%d ", pos[0] + 1);
+
+                }
+        }
+        else if(!(strcmp(attribute , "count"))){
+            printf("this text has been repeated %d times\n" , count);
+        }
+        else if(!(strcmp(attribute , "at"))){
+            int n;
+            scanf("%d" , &n);
+            if(n > count)
+                printf("-1\n");
+            else
+                printf("the %dthtime that text repeated starts from character number: %d" , n , pos[n-1] + 1 );
+        }
+        else if(!(strcmp(attribute , "byword"))){
+            if(count == 0)
+                printf("-1\n");
+            else
+                printf("%s starts from word number: %d\n" , tobefound ,  posw[0] + 1);
+        }
+        else if(!(strcmp(attribute , "all"))){
+            for (int i = 0; i < count ; i++)
+            {
+                printf("'%s' starts from character number: ", tobefound);
+                printf("%d ", pos[i] + 1);
+            }
+        }
+
+        fclose(fp);
+    }
+    else*/ {
     do 
     {
         char word[50] = {'\0'};
         ch = fscanf(fp, "%s", word);
-        //if(tobefound[0] == '*'){
-        //    word[0] = '*';
-        //    for (int i = 0; i < count; i++)
-        //    {
-        //        /* code */
-        //    }
-        //    
-        //}
 
         if(tobefound[0] == '*'){
             int m ;
@@ -1112,6 +1235,7 @@ void findstr(){
     }
 
     fclose(fp);
+    }
 }
 
 void replacestr(){
@@ -1125,8 +1249,8 @@ void replacestr(){
     while((get = getchar()) != '1'){
     }
     get = getchar();
-    /*if( get == '\"'){
-        int breakflag = 0;
+    if( get == '\"'){
+        int breakflag = 0 , wordnum;
         for (wordnum = 0; ; )
         {
             for (int j = 0; ; j++)
@@ -1140,14 +1264,18 @@ void replacestr(){
                     breakflag = 1;
                     break;
                 }
-                tobefounds[i][j] = get;
-                if(get )
+                tobefounds[wordnum][j] = get;
             }
             if(breakflag == 1)
                 break; 
-        }        
+        }  
+        for (int i = 0; i < wordnum ; i++)
+        {
+            printf("%s " , tobefounds[i]);
+        }      
     }
-    else*/{
+    
+    else {
         get = getchar();
         for (int i = 0; ; i++)
         {
@@ -1513,7 +1641,7 @@ void autoindent(){
             i++;
         }
        }
-        if(get == EOF)
+        if(get == EOF) 
             break;
         else if(get == '{'){
             flag++;
@@ -1688,41 +1816,53 @@ void compare(){
     }
 }
 
-void directoryTree(char *name , int indent){
-    static int depth;
-    int depthConter = 0;
-    if(callcounter == 1){
-    scanf("%d" , &depth);
-    if(depth < -1){
-        printf("invalid depth please try again\n");
-        return;
-    }
-    else if(depth == -1)
-        depth = 1000;
-    }
-    DIR *dir;
-    struct dirent *entry;
+int Fdepth;
 
-    if (!(dir = opendir(name)))
-        return;
-
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_type == DT_DIR) {
-            char path[1024];
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-                continue;
-            snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
-            printf("%*s[%s]\n", indent, "", entry->d_name);
-            if(callcounter < depth){
-                directoryTree(path, indent + 2);
-                callcounter++;
-            }
-        } else {
-            printf("%*s- %s\n", indent, "", entry->d_name);
+void tree(char *basePath, int root , int treeDepthCounter)
+{
+    if(treeDepthCounter == 0){
+        scanf("%d" , &Fdepth);
+        if(Fdepth < -1){
+            printf("Invalid depth\n");
+            return;
         }
     }
+    if(treeDepthCounter  == Fdepth  && Fdepth != -1)
+        return;
+    int i;
+    char path[1000];
+    struct dirent *dp;
+    DIR *dir = opendir(basePath);
+
+    if (!dir){
+        return;
+    }
+
+    while ((dp = readdir(dir)) != NULL)
+    {
+        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+        {
+            for (i=0; i<root; i++) 
+            {
+                if (i%2 == 0 || i == 0)
+                    printf("%c", '|');
+                else
+                    printf(" ");
+
+            }
+
+            printf("%c%c%s\n", '|' , '_', dp->d_name);
+
+            strcpy(path, basePath);
+            strcat(path, "/");
+            strcat(path, dp->d_name);
+            tree(path, root + 2 , treeDepthCounter + 1);
+        }
+    }
+
     closedir(dir);
 }
+
 
 void undo(){
     char get;
@@ -1743,12 +1883,14 @@ void undo(){
     
     FILE *hidden , *fp;
     hidden = fopen(".hidden.txt" , "r");
+    if(!(fp = fopen(fileName , "w"))){
+        printf("file doesn't exist\n");
+        return;
+    }
     if((get = fgetc(hidden)) == EOF){
         printf("There is no action to undo\n");
         return;
     }
-    if(!(fp = fopen(fileName , "w")))
-        printf("file doesn't exist\n");
     while (1)
     {
         if(get == EOF)

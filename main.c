@@ -1026,6 +1026,7 @@ void findstr(){
         int n;
         int textRepeatitionCounter[100] = {0};
         int atFlag = 0;
+        int allFlag = 0;
         int wordlength2[100] ={0};
         int posMemoryWord[100] = {0};
         int fc = 0;
@@ -1033,8 +1034,12 @@ void findstr(){
             scanf("%d" , &n);
             atFlag = 1;
         }
-        else if(!(strcmp(attribute , "count")))
+        else if(!(strcmp(attribute , "count")) )
             n = -1;
+        else if(!(strcmp(attribute , "all"))){
+            n = -1;
+            allFlag = 1;
+        }
         else 
             n = 1;
         //printf("wordnum: %d\n" , wordnumber);
@@ -1147,7 +1152,7 @@ void findstr(){
         {
             for (int i = 1 ; i < wordnumber; i++)
             {
-                printf("%d %d" , posMemoryWord[i] , posMemoryWord[i-1]);
+                //printf("%d %d" , posMemoryWord[i] , posMemoryWord[i-1]);
                 if(posMemoryWord[i] != (posMemoryWord[i-1] + 1)  ){
                     printf("text not found in file\n");
                     return;
@@ -1165,7 +1170,128 @@ void findstr(){
             }
             printf("text has been repeated %d times\n", min);
         }
-        
+        else if(allFlag == 1){
+            int min = 10000000;
+            int posMemory[100] = {0};
+            for (int i = 0; i < wordnumber; i++)
+            {
+                if(textRepeatitionCounter[i] < min)
+                    min = textRepeatitionCounter[i];
+            }
+            //printf("min: %d\n" , min);
+            for (int n = 1 ; n <= min ; n++)
+            {
+                int textRepeatitionCounter[100] = {0};
+                int wordlength2[100] = {0};
+                for (int wc = 0 ; wc < wordnumber; wc++)
+                {
+                    posMemory[wc] = -100;
+                    int foundedNum = 0;
+                    int pointer = 0;
+                    fclose(fp);
+                    fp = fopen(fileName , "r");
+                    int fj = 0;
+                    for ( fj = 0; fj < strlen(tobefounds[wc]); fj++)
+                    {
+                        tobefound[fj] = tobefounds[wc][fj];
+                    }
+                    tobefound[fj] = '\0';
+                    //printf("tobefound:%s\n" , tobefound);
+                    int wordlength[100] = {0};
+                    int cc = 0;
+                    do 
+                    {
+                        char word[50] = {'\0'};
+                        ch = fscanf(fp, "%s", word);
+                        wordlength[cc] = strlen(word);
+                        int fl = 0;
+                        if(tobefound[0] == '*'){
+                            int m ;
+                            //printf("to be found: %s\n" , tobefound);
+                            for (int j = 0; j < wordlength[cc]; j++)
+                            {
+                                if(word[j] == tobefound[1] && word[j+1] == tobefound[2]){
+                                    m = j;
+                                    fl = 1;
+                                }
+                            }
+                            if(fl == 0){
+                                pointer += wordlength[cc];
+                                cc++;
+                                pointer++;
+                                continue;
+                            }
+                            int mf = 1;
+                            word[0] = '*';
+                            for (int k =  m ; k < wordlength[cc]; k++)
+                            {
+                                word[mf] = word[k];
+                                mf++;
+                            }
+                            word[mf] = '\0';
+                            //printf("word: %s\n" , word);
+                        }
+                        else{
+                        for (int i = 0; i < strlen(tobefound); i++)
+                        {   
+                            if(tobefound[i] == '\\' && tobefound[i+1] =='*'){
+                                word[i] = '\\';
+                                word[i+1] = '*';
+                                //printf("tobefound:%s\n" , tobefound);
+                                //printf("word:%s\n" , word);
+                                break;
+                            }
+                            else if(tobefound[i] == '*'){
+                                tobefound[i+1] = '\0';
+                                word[i] = '*';
+                                word[i+1] = '\0';
+                                //printf("--tobefound:%s\n" , tobefound);
+                                //printf("word:%s\n" , word);
+                            }
+                        }
+                        }
+                        //printf("--tobefound:%s\n" , tobefound);
+                        //printf("word:%s\n" , word);
+                        
+                        if(strcmp(word, tobefound) == 0)
+                        {
+                            foundedNum++;
+                            posMemory[wc] = pointer;
+                            posMemoryWord[wc] = cc;
+                            wordlength2[wc] = wordlength[cc];
+                            fc++;
+                            if(foundedNum == n){
+                                break;
+                            }
+                        }
+                        pointer += wordlength[cc];
+                        pointer++;
+                        cc++;
+                        //printf("%s ",word);       
+                    } while (ch != EOF);
+                    //printf("%d - %d\n" , posMemory[wc] , wc);
+                    textRepeatitionCounter[wc] = foundedNum;
+                    if(foundedNum < n){
+                        printf("text has not been repeated %d times" , n);
+                        return;
+                    }
+
+                }
+                    for (int i = 1 ; i < wordnumber; i++)
+                    {
+                        //printf("%d %d\n" , posMemory[i] , posMemory[i-1]);
+                        //printf("wordlength: %d\n" , wordlength2[i-1]);
+                        if(posMemory[i] != (posMemory[i-1] + wordlength2[i-1]) +1 ){
+                            printf("text not found in file\n");
+                            return;
+                        }
+                    }
+
+                    printf("text starts from character number: %d\n" , posMemory[0] + 1);
+                
+            }
+            
+        }
 
         fclose(fp);
     }

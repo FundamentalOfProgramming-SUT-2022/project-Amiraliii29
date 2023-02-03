@@ -2696,5 +2696,6 @@ void undo(){
     }
     fclose(fp);
     fclose(hidden);
+    
     printf("Undoed successfully\n");
 }

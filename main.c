@@ -26,6 +26,8 @@ void undo();
 
 char clipboard[1000000];
 int callcounter = 0;
+int flagArman = 0;
+char stringArman[1000] = {'\0'};
 
 int main(){
 
@@ -34,6 +36,7 @@ int main(){
     FILE *hidden;
     hidden = fopen(".hidden.txt" , "w");
     fclose(hidden);
+    fopen_mkdir("root/t.txt" , ")");
 
     char input;
 
@@ -118,8 +121,8 @@ void createfile(){
         }
     }
     FILE *fp;
-    if(fp == fopen(fileName , "r")){
-        printf("file already exists");
+    if((fp = fopen(fileName , "r"))){
+        printf("file already exists\n");
         fclose(fp);
         return;
     }
@@ -154,13 +157,10 @@ FILE *fopen_mkdir(char *path, char *mode) {
 }
 
 void insert(){
-    getchar();
-    getchar();
-    getchar();
-    getchar();
-    getchar();
-    getchar();
     char in;
+    while ((in = getchar()) != 'e')
+    {
+    }
     char fileName[100] = {'\0'};
     in = getchar();
     if(in == '\"'){
@@ -187,7 +187,8 @@ void insert(){
         }
     }
     //printf("---%s---\n" , fileName);
-    char text[2000000];
+    char text[2000000] = {'\0'};
+    if(flagArman == 0){
     while (in != 'r')
     {
         in = getchar();
@@ -214,6 +215,14 @@ void insert(){
             in = getchar();
         }
         
+    }
+    }
+    else{
+        for (int i = 0; i < strlen(stringArman); i++)
+        {
+            text[i] = stringArman[i];
+        }
+        flagArman = 0;
     }
     //printf("--%s--\n" , text);
     do
@@ -309,6 +318,11 @@ void insert(){
         fputc(temp[i] , file);
     }
     fclose(file);
+    for (int i = 0; i < 1000 ; i++)
+    {
+        stringArman[i] = '\0';
+    }
+    
 }
 
 void cat(){
@@ -322,17 +336,32 @@ void cat(){
         get = getchar();
         if(get == '\n')
             break;
+        else if(get == '='){
+            getchar();
+            getchar();
+            flagArman = 1;
+            break;
+        }
+        else if(get == ' '){
+            continue;
+        }
         else 
             fileName[i] = get;
     }
     FILE *fp;
     if(!(fp = fopen(fileName , "r")))
         printf("file doesn't exist :|\n");
-
+    int a = 0;
     while ((get = fgetc(fp)) != EOF)
     {
-        printf("%c" , get);
+        if(flagArman == 1){
+            stringArman[a] = get;
+            a++;
+        }
+        else
+            printf("%c" , get);
     }
+    stringArman[a] = '\0';
     fclose(fp);
 }
 
@@ -601,7 +630,7 @@ void copystr(){
             clipboard[i] = get;
         }
         fclose(file);
-        printf("%s\n" , clipboard);
+        //printf("%s\n" , clipboard);
     }
     else if(direction == 'b'){
         char temp1[1000000] , temp2[1000000];
@@ -1004,6 +1033,11 @@ void findstr(){
             get = getchar();
             if(get == '\n' || get == ' ')
                 break;
+            else if(get == 'D'){
+                getchar();
+                flagArman = 1;
+                break;
+            }
             else 
                 attribute[i] = get;
         }
@@ -1015,9 +1049,12 @@ void findstr(){
     int pos[30] , posw[30];
     int pointer = 0;
     int loop;
-
+    int a = 0;
     if((fp = fopen(fileName, "r")) == 0){
-        printf("file doesn't exist\n");
+        if(flagArman == 0)
+            printf("file doesn't exist\n");
+        else 
+            strcat(stringArman,"file doesn't exist\n");
         return;
     }
     /// with qoutation:
@@ -1132,7 +1169,10 @@ void findstr(){
             //printf("%d - %d\n" , pos[wc] , wc);
             textRepeatitionCounter[wc] = foundedNum;
             if(foundedNum < n){
-                printf("text has not been repeated %d times" , n);
+                if(flagArman == 0)
+                    printf("text has not been repeated %d times" , n);
+                else
+                    strcat(stringArman , "text has not been repeated that many times" );
                 return;
             }
         }
@@ -1141,12 +1181,18 @@ void findstr(){
             {
                 //printf("%d %d" , posMemory[i] , posMemory[i-1]);
                 if(posMemory[i] != (posMemory[i-1] + wordlength2[i-1]) +1 ){
-                    printf("text not found in file\n");
+                    if(flagArman == 0)
+                        printf("text not found in file\n");
+                    else
+                        strcat(stringArman , "text not found in file\n");
                     return;
                 }
             }
-
-            printf("text starts from character number: %d\n" , posMemory[0] + 1);
+            if(flagArman == 0)
+                printf("text starts from character number: %d\n" , posMemory[0] + 1);
+            else{
+                snprintf(stringArman, 20 ,"text starts from character number: %d\n" , posMemory[0] + 1);
+            }
         }
         else if (!(strcmp(attribute , "byword")))
         {
@@ -1154,12 +1200,17 @@ void findstr(){
             {
                 //printf("%d %d" , posMemoryWord[i] , posMemoryWord[i-1]);
                 if(posMemoryWord[i] != (posMemoryWord[i-1] + 1)  ){
-                    printf("text not found in file\n");
+                    if(flagArman == 0)
+                        printf("text not found in file\n");
+                    else
+                        strcat(stringArman ,"text not found in file\n" );
                     return;
                 }
             }
-
-            printf("text starts from word number: %d\n" , posMemoryWord[0] + 1);
+            if(flagArman == 0)
+                printf("text starts from word number: %d\n" , posMemoryWord[0] + 1);
+            else
+                snprintf(stringArman , 50 , "text starts from word number: %d\n" , posMemoryWord[0] + 1);
         }
         else if(!(strcmp(attribute , "count"))){
             int min = 10000000;
@@ -1168,7 +1219,10 @@ void findstr(){
                 if(textRepeatitionCounter[i] < min)
                     min = textRepeatitionCounter[i];
             }
-            printf("text has been repeated %d times\n", min);
+            if(flagArman == 0)
+                printf("text has been repeated %d times\n", min);
+            else
+                snprintf(stringArman , 50 ,"text has been repeated %d times\n", min );
         }
         else if(allFlag == 1){
             int min = 10000000;
@@ -1272,7 +1326,10 @@ void findstr(){
                     //printf("%d - %d\n" , posMemory[wc] , wc);
                     textRepeatitionCounter[wc] = foundedNum;
                     if(foundedNum < n){
-                        printf("text has not been repeated %d times" , n);
+                        if(flagArman == 0)
+                            printf("text has not been repeated %d times" , n);
+                        else 
+                            strcat(stringArman , "text has not been repeated that many times");
                         return;
                     }
 
@@ -1282,12 +1339,17 @@ void findstr(){
                         //printf("%d %d\n" , posMemory[i] , posMemory[i-1]);
                         //printf("wordlength: %d\n" , wordlength2[i-1]);
                         if(posMemory[i] != (posMemory[i-1] + wordlength2[i-1]) +1 ){
-                            printf("text not found in file\n");
+                            if(flagArman == 0)
+                                printf("text not found in file\n");
+                            else 
+                                strcat(stringArman , "text not found in file\n");
                             return;
                         }
                     }
-
-                    printf("text starts from character number: %d\n" , posMemory[0] + 1);
+                    if(flagArman == 0)
+                        printf("text starts from character number: %d\n" , posMemory[0] + 1);
+                    else
+                        snprintf(stringArman , 60 , "text starts from character number: %d\n" , posMemory[0] + 1);
                 
             }
             
@@ -1368,38 +1430,71 @@ void findstr(){
     } while (ch != EOF);
 
     if(flagv == 0){
-        if(count == 0)  
-            printf("-1\n");
+        if(count == 0){
+            if(flagArman == 0)
+                printf("-1\n");
+            else
+                strcat(stringArman , "-1\n");
+        }
         else
             {
+            if(flagArman == 0){
             printf("'%s' starts from character number: ", tobefound);
             printf("%d\n", pos[0] + 1);
-
+            }
+            else{
+                printf("hi\n");
+                snprintf(stringArman , 60 , "text starts from character number: %d\n", pos[0] + 1);
+            }
             }
     }
     else if(!(strcmp(attribute , "count"))){
-        printf("this text has been repeated %d times\n" , count);
+        if(flagArman == 0)
+            printf("this text has been repeated %d times\n" , count);
+        else
+            snprintf(stringArman ,60, "this text has been repeated %d times\n" , count );
     }
     else if(!(strcmp(attribute , "at"))){
         int n;
         scanf("%d" , &n);
-        printf("n: %d\n" , n);
-        if(n > count)
-            printf("-1\n");
-        else
-            printf("the %dthtime that text repeated starts from character number: %d" , n , pos[n-1] + 1 );
+        //printf("n: %d\n" , n);
+        if(n > count){
+            if(flagArman == 0)
+                printf("-1\n");
+            else
+                strcat(stringArman , "-1\n");
+        }
+        else{
+            if(flagArman == 0)
+                printf("the %dthtime that text repeated starts from character number: %d" , n , pos[n-1] + 1 );
+            else
+                snprintf(stringArman ,90, "the %dthtime that text repeated starts from character number: %d" , n , pos[n-1] + 1  );
+        }
     }
     else if(!(strcmp(attribute , "byword"))){
-        if(count == 0)
-            printf("-1\n");
-        else
-            printf("%s starts from word number: %d\n" , tobefound ,  posw[0] + 1);
+        if(count == 0){
+            if(flagArman == 0)
+                printf("-1\n");
+            else
+                strcat(stringArman , "-1\n");
+        }
+        else{
+            if(flagArman == 0)
+                printf("%s starts from word number: %d\n" , tobefound ,  posw[0] + 1);
+            else
+                snprintf(stringArman , 80 ,"%s starts from word number: %d\n" , tobefound ,  posw[0] + 1 );
+        }
     }
     else if(!(strcmp(attribute , "all"))){
         for (int i = 0; i < count ; i++)
         {
+            if(flagArman == 0){
             printf("'%s' starts from character number: ", tobefound);
             printf("%d ", pos[i] + 1);
+            }
+            else{
+                snprintf(stringArman , 70 ,"text starts from character number: %d" , pos[i] + 1 );
+            }
         }
     }
 
@@ -2225,6 +2320,12 @@ void grep(){
         {
             if(get == ' ')
                 break;
+            else if(get == '='){
+                flagArman = 1;
+                endflag = 1;
+                getchar();getchar();
+                break;
+            }
             else if(get == '\n'){
                 endflag = 1;
                 break;
@@ -2242,16 +2343,28 @@ void grep(){
             if(strstr(temp,pattern)!= NULL){
                 if(cop == 1)
                     copCounter++;
-                else if(lop == 1)
-                    printf("%s\n" , fileName);
-                else
-                    printf("%s: %s",fileName ,temp);
+                else if(lop == 1){
+                    if(flagArman == 0)
+                        printf("%s\n" , fileName);
+                    else
+                        sprintf(stringArman , "%s\n" , fileName);
+                }
+                else{
+                    if(flagArman == 0)
+                        printf("%s: %s",fileName ,temp);
+                    else
+                        sprintf(stringArman , "%s: %s",fileName ,temp);
+                }
             }
         }
         fclose(fp);
         if(endflag == 1){
-            if(cop == 1)
-                printf("%d\n" , copCounter);
+            if(cop == 1){
+                if(flagArman == 0)
+                    printf("%d\n" , copCounter);
+                else
+                    sprintf(stringArman , "%d\n" , copCounter );
+            }
             return;
         }
     }
@@ -2466,8 +2579,19 @@ int Fdepth;
 
 void tree(char *basePath, int root , int treeDepthCounter)
 {
+    char get;
     if(treeDepthCounter == 0){
         scanf("%d" , &Fdepth);
+        //arman:
+        get = getchar();
+        if(get == ' '){
+            get = getchar();
+            if(get == '='){
+                getchar(); getchar();
+                flagArman = 1;
+            }
+        }
+        //end arman
         if(Fdepth < -1){
             printf("Invalid depth\n");
             return;
@@ -2483,21 +2607,47 @@ void tree(char *basePath, int root , int treeDepthCounter)
     if (!dir){
         return;
     }
-
+    int a = 0;
     while ((dp = readdir(dir)) != NULL)
     {
         if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
         {
             for (i=0; i<root; i++) 
             {
-                if (i%2 == 0 || i == 0)
-                    printf("%c", '|');
-                else
-                    printf(" ");
+                if (i%2 == 0 || i == 0){
+                    if(flagArman == 0)
+                        printf("%c", '|');
+                    else{
+                        stringArman[a] = '|';
+                        a++;
+                    }
+                }
+                else{
+                    if(flagArman == 0)
+                        printf(" ");
+                    else{
+                        stringArman[a] = ' ';
+                        a++;
+                    }
+                }
 
             }
-
-            printf("%c%c%s\n", '|' , '_', dp->d_name);
+            if(flagArman == 0)
+                printf("%c%c%s\n", '|' , '_', dp->d_name);
+            else{
+                stringArman[a] = '|';
+                a++;
+                stringArman[a] = '_';
+                a++;
+                for (int i = 0; i < strlen(dp->d_name); i++)
+                {
+                    stringArman[a] = dp->d_name[i];
+                    a++;
+                }
+                
+                stringArman[a] = '\n';
+                a++;
+            }
 
             strcpy(path, basePath);
             strcat(path, "/");
@@ -2505,7 +2655,7 @@ void tree(char *basePath, int root , int treeDepthCounter)
             tree(path, root + 2 , treeDepthCounter + 1);
         }
     }
-
+    stringArman[a] = '\0';
     closedir(dir);
 }
 
